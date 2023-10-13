@@ -5,7 +5,7 @@ import clsx from "clsx";
 import { FieldErrors, FieldValues, UseFormRegister } from "react-hook-form";
 
 interface InputProps {
-  lable: string;
+  label: string;
   id: string;
   type?: string;
   required?: boolean;
@@ -15,7 +15,7 @@ interface InputProps {
 }
 
 const Input: React.FC<InputProps> = ({
-  lable,
+  label,
   id,
   type,
   required,
@@ -23,13 +23,18 @@ const Input: React.FC<InputProps> = ({
   errors,
   disabled,
 }) => {
+  console.log(errors);
+
   return (
     <div>
       <label
         htmlFor={id}
-        className="block text-sm font-medium leading-6 text-gray-900"
+        className={clsx(
+          `block text-sm font-semibold leading-6 text-gray-900`,
+          errors[id] && "text-rose-500"
+        )}
       >
-        {lable}
+        {label}
       </label>
 
       <div className="mt-2">
@@ -37,7 +42,7 @@ const Input: React.FC<InputProps> = ({
           id={id}
           type={type}
           disabled={disabled}
-          {...register(id, { required })}
+          {...register(id, { required: required })}
           className={clsx(
             `
             form-input
@@ -54,11 +59,10 @@ const Input: React.FC<InputProps> = ({
             placeholder:text-gray-400
             focus:ring-2
             focus:ring-inset
-            focus:ring-sky-600
             sm:text-sm
             sm:leading-6
           `,
-            errors[id] && "focus:ring-rose-500",
+            errors[id] && "focus:ring-rose-500 ring-rose-500 ",
             disabled && "opacity-50 cursor-default"
           )}
         />
