@@ -16,7 +16,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body suppressHydrationWarning={true} className=" select-none">
+      <body suppressHydrationWarning={true}>
         <AuthContext>
           <ToasterContext />
           {children}
