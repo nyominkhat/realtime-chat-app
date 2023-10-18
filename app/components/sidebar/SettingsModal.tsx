@@ -118,7 +118,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
           "
           >
             <Button disable={isLoading} secondary onClick={onClose}>
-              Cancle
+              Cancel
             </Button>
 
             <Button disable={isLoading} type="submit" onClick={onClose}>
