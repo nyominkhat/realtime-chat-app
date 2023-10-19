@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Fragment, useMemo, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { Conversation, User } from "@prisma/client";
 import { format } from "date-fns";
 import { Dialog, Transition } from "@headlessui/react";
@@ -8,9 +8,10 @@ import { IoClose, IoTrash } from "react-icons/io5";
 
 import Avatar from "@/app/components/Avatar";
 import ConfirmModal from "./ConfirmModal";
+import AvatarGroup from "@/app/components/AvatarGroup";
 
 import useOtherUser from "@/app/hooks/useOtherUser";
-import AvatarGroup from "@/app/components/AvatarGroup";
+import useActiveList from "@/app/hooks/useActiveList";
 
 interface ProfileDrawerProps {
   isOpen: boolean;
@@ -27,22 +28,36 @@ const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
 }) => {
   const otherUser = useOtherUser(data);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [isActive, setIsActive] = useState(false);
+  const [otherUserEmail, setOtherUserEmail] = useState("");
+  const { members } = useActiveList();
+
+  useEffect(() => {
+    if (otherUser) {
+      setIsActive(members.indexOf(otherUser?.email!) !== -1);
+      setOtherUserEmail(otherUser?.email!);
+    }
+  }, [members, otherUser]);
 
   const joinedDate = useMemo(() => {
-    return format(new Date(otherUser.createdAt), "PP");
-  }, [otherUser.createdAt]);
+    if (otherUser) {
+      return format(new Date(otherUser.createdAt), "PP");
+    }
+  }, [otherUser]);
 
   const title = useMemo(() => {
-    return data.name || otherUser.name;
-  }, [data.name, otherUser.name]);
+    if (otherUser) {
+      return data.name || otherUser.name;
+    }
+  }, [data.name, otherUser]);
 
   const statusText = useMemo(() => {
     if (data.isGroup) {
       return `${data.users.length} members`;
     }
 
-    return "Active";
-  }, [data]);
+    return isActive ? "Active" : "Offline";
+  }, [data, isActive]);
 
   return (
     <>
@@ -138,7 +153,9 @@ const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
                                     Emails
                                   </dt>
                                   <dd className="mt-1 text-sm text-gray-900 sm:col-span-2">
-                                    {data.users.map((user) => user.email).join(', ')}
+                                    {data.users
+                                      .map((user) => user.email)
+                                      .join(", ")}
                                   </dd>
                                 </div>
                               )}
@@ -149,7 +166,7 @@ const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
                                     Email
                                   </dt>
                                   <dd className="mt-1 text-sm text-gray-900 sm:col-span-2">
-                                    {otherUser.email}
+                                    {otherUserEmail}
                                   </dd>
                                 </div>
                               )}

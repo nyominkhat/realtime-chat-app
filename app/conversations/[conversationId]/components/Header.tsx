@@ -2,14 +2,15 @@
 
 import { Conversation, User } from "@prisma/client";
 import Link from "next/link";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { HiChevronLeft, HiEllipsisHorizontal } from "react-icons/hi2";
 
 import ProfileDrawer from "./ProfileDrawer";
-
-import useOtherUser from "@/app/hooks/useOtherUser";
 import Avatar from "@/app/components/Avatar";
 import AvatarGroup from "@/app/components/AvatarGroup";
+
+import useOtherUser from "@/app/hooks/useOtherUser";
+import useActiveList from "@/app/hooks/useActiveList";
 
 interface HeaderProps {
   conversation: Conversation & {
@@ -20,14 +21,24 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ conversation }) => {
   const otherUser = useOtherUser(conversation);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [isActive, setIsActive] = useState(false);
+  const [otherUsername, setOtherUsername] = useState("");
+  const { members } = useActiveList();
+
+  useEffect(() => {
+    if (otherUser) {
+      setIsActive(members.indexOf(otherUser?.email!) !== -1);
+      setOtherUsername(otherUser?.name!);
+    }
+  }, [members, otherUser]);
 
   const statusText = useMemo(() => {
     if (conversation.isGroup) {
       return `${conversation.users.length} members`;
     }
 
-    return "Active";
-  }, [conversation]);
+    return isActive ? "Active" : "Offline";
+  }, [conversation, isActive]);
 
   return (
     <>
@@ -54,7 +65,7 @@ const Header: React.FC<HeaderProps> = ({ conversation }) => {
           )}
 
           <div className="flex flex-col">
-            <div>{conversation.name || otherUser.name}</div>
+            <div>{conversation.name || otherUsername}</div>
             <div className="text-sm font-light text-neutral-500">
               {statusText}
             </div>
